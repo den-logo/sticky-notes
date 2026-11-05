@@ -1,3 +1,54 @@
 .app {
-  padding: var(--space-lg);
+  min-height: 100dvh;
+}
+
+.workspace {
+  position: relative;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.header {
+  position: absolute;
+  top: var(--space-6);
+  left: var(--space-8);
+  z-index: 1;
+}
+
+.title {
+  color: var(--color-board-ink);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.viewportNotice {
+  display: none;
+  min-height: 100dvh;
+  padding: var(--space-8);
+  text-align: center;
+}
+
+.noticeTitle {
+  font-size: var(--font-size-lg);
+}
+
+.noticeText {
+  max-width: 36ch;
+  margin-top: var(--space-3);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+@media (width < 1024px) {
+  .workspace {
+    display: none;
+  }
+
+  .viewportNotice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
 }

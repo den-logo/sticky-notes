@@ -1,0 +1,30 @@
+.board {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-board);
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      var(--color-board-grid) 0 1px,
+      transparent 1px 6px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      var(--color-board-grid) 0 1px,
+      transparent 1px 6px
+    );
+}
+
+.noteTitle {
+  font-size: var(--font-size-lg);
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.noteText {
+  margin-top: var(--space-3);
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+}

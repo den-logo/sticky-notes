@@ -1,8 +1,20 @@
 :root {
-  --font-family-base: system-ui, sans-serif;
-  --color-text: #222;
-  --color-background: #fafafa;
-  --space-lg: 2rem;
+  --font-family-base: Nunito, sans-serif;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --color-text: #342d20;
+  --color-text-muted: #6e6556;
+  --color-background: #faf7ef;
+  --color-board: #c8a45c;
+  --color-board-ink: #4a3920;
+  --color-board-grid: rgb(89 61 21 / 7%);
+  --color-note-yellow: #ffe69a;
+  --color-note-border: #e7c86e;
+  --space-3: 0.75rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --radius-note: 0.5rem;
 
   font-family: var(--font-family-base);
   color: var(--color-text);
@@ -13,6 +25,9 @@
   box-sizing: border-box;
 }
 
-body {
+body,
+h1,
+h2,
+p {
   margin: 0;
 }
