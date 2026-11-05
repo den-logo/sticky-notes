@@ -1,0 +1,18 @@
+:root {
+  --font-family-base: system-ui, sans-serif;
+  --color-text: #222;
+  --color-background: #fafafa;
+  --space-lg: 2rem;
+
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background: var(--color-background);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
