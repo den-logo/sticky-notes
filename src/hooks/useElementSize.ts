@@ -1,13 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react'
-
-type ElementSize = {
-  width: number
-  height: number
-}
+import type { Size } from '../types/geometry'
 
 export function useElementSize<T extends HTMLElement>() {
   const ref = useRef<T>(null)
-  const [size, setSize] = useState<ElementSize | null>(null)
+  const [size, setSize] = useState<Size | null>(null)
 
   useLayoutEffect(() => {
     const element = ref.current

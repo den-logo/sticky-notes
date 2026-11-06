@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react'
 import { useStore } from 'zustand'
 import { useElementSize } from '../../hooks/useElementSize'
 import { t } from '../../libs/i18n'
@@ -10,6 +11,12 @@ export default function Board() {
   const { ref, size } = useElementSize<HTMLElement>()
   const notes = useStore(notesStore, (state) => state.notes)
   const createNote = useStore(notesStore, (state) => state.createNote)
+  const moveNote = useStore(notesStore, (state) => state.moveNote)
+  const constrainNotes = useStore(notesStore, (state) => state.constrainNotes)
+
+  useLayoutEffect(() => {
+    if (size && size.width > 0 && size.height > 0) constrainNotes(size)
+  }, [size, constrainNotes])
 
   function handleCreateNote() {
     const board = ref.current
@@ -26,7 +33,11 @@ export default function Board() {
         disabled={!size || size.width === 0 || size.height === 0}
       />
       {notes.length === 0 && <p className={styles.emptyState}>{t('board.emptyState')}</p>}
-      {notes.map((note) => <Note key={note.id} note={note} />)}
+      <div className={styles.notesLayer}>
+        {size && notes.map((note) => (
+          <Note key={note.id} note={note} boardSize={size} onMove={moveNote} />
+        ))}
+      </div>
     </section>
   )
 }

@@ -11,6 +11,7 @@
   --color-board-grid: rgb(89 61 21 / 7%);
   --color-note-yellow: #ffe69a;
   --color-note-border: #e7c86e;
+  --color-note-grip: #aa8c40;
   --color-control-background: #342d20;
   --color-control-hover: #4a3920;
   --color-control-text: #fff6dc;
@@ -22,6 +23,7 @@
   --radius-note: 0.5rem;
   --radius-control: 0.75rem;
   --control-size: 2.75rem;
+  --note-handle-height: 2rem;
 
   font-family: var(--font-family-base);
   color: var(--color-text);

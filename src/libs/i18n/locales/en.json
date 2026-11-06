@@ -3,6 +3,8 @@
   "board.label": "Sticky notes board",
   "board.emptyState": "A little space for your next idea.\nCreate a note to get started.",
   "toolbar.createNote": "Add note",
+  "note.move": "Move note",
+  "note.moveHint": "Drag to move, or use the arrow keys. Press Escape to cancel a drag.",
   "viewport.title": "A little more room, please",
   "viewport.description": "Sticky Notes needs a browser window at least 1024 pixels wide. Widen your window to use the board."
 }
