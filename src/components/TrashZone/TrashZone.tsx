@@ -21,14 +21,7 @@ export default function TrashZone({ ref, isVisible, isOver }: TrashZoneProps) {
     >
       <div className={styles.zone}>
         <Icon name="trash" size={22} />
-        <span className={styles.label}>
-          <span className={styles.labelText} data-active={!isOver || undefined} aria-hidden={isOver}>
-            {t('trash.dragToDelete')}
-          </span>
-          <span className={styles.labelText} data-active={isOver || undefined} aria-hidden={!isOver}>
-            {t('trash.releaseToDelete')}
-          </span>
-        </span>
+        <span className={styles.label}>{t('trash.dragToDelete')}</span>
       </div>
     </div>
   )

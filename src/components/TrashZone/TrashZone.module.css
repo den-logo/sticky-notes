@@ -18,7 +18,7 @@
   justify-content: center;
   gap: var(--space-2);
   min-width: 15rem;
-  min-height: 3.5rem;
+  min-height: 4.5rem;
   padding: var(--space-3) var(--space-6);
   border: 2px dashed var(--color-trash-border);
   border-radius: var(--radius-control);
@@ -37,16 +37,7 @@
 }
 
 .label {
-  display: grid;
-}
-
-.labelText {
-  grid-area: 1 / 1;
   white-space: nowrap;
-}
-
-.labelText:not([data-active]) {
-  visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

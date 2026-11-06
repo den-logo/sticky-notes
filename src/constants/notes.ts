@@ -1,6 +1,6 @@
 export const DEFAULT_NOTE_SIZE = {
-  width: 250,
-  height: 250,
+  width: 300,
+  height: 300,
 }
 
 export const MIN_NOTE_SIZE = {

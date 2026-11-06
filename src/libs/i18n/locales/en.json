@@ -25,7 +25,6 @@
   "note.text": "Note text",
   "note.textPlaceholder": "Write something…",
   "trash.dragToDelete": "Drag here to delete",
-  "trash.releaseToDelete": "Release to delete",
   "persistence.loadFailed": "We couldn't load your saved notes. Your saved data hasn't been changed.",
   "persistence.saveFailed": "Changes couldn't be saved. Keep this tab open and try again.",
   "persistence.retry": "Try again",
