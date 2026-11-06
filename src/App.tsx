@@ -6,9 +6,6 @@ export default function App() {
   return (
     <main className={styles.app}>
       <div className={styles.workspace}>
-        <header className={styles.header}>
-          <h1 className={styles.title}>{t('app.title')}</h1>
-        </header>
         <Board />
       </div>
       <section className={styles.viewportNotice} aria-labelledby="viewport-title">

@@ -17,6 +17,20 @@
     );
 }
 
+.header {
+  position: absolute;
+  top: var(--space-6);
+  left: var(--space-8);
+  pointer-events: none;
+}
+
+.title {
+  color: var(--color-board-ink);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 .notesLayer {
   position: absolute;
   inset: 0;

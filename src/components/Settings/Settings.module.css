@@ -32,6 +32,7 @@
   width: 23rem;
   max-width: calc(100vw - var(--space-8));
   max-height: calc(100dvh - var(--space-8));
+  overflow: auto;
   padding: var(--space-6);
   border: 1px solid var(--color-panel-border);
   border-radius: var(--radius-control);

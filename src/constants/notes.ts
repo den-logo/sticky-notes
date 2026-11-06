@@ -8,4 +8,6 @@ export const MIN_NOTE_SIZE = {
   height: 160,
 }
 
+export const MAX_DEFAULT_NOTE_HEIGHT = 1000
+
 export const NOTE_CREATION_OFFSET = 20

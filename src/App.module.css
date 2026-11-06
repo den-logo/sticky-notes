@@ -8,20 +8,6 @@
   overflow: hidden;
 }
 
-.header {
-  position: absolute;
-  top: var(--space-6);
-  left: var(--space-8);
-  z-index: 1;
-}
-
-.title {
-  color: var(--color-board-ink);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
-
 .viewportNotice {
   display: none;
   min-height: 100dvh;

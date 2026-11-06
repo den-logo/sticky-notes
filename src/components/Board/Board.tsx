@@ -19,6 +19,8 @@ export default function Board() {
   const loadNotes = useStore(notesStore, (state) => state.loadNotes)
   const createNote = useStore(notesStore, (state) => state.createNote)
   const defaultNoteColor = useStore(settingsStore, (state) => state.defaultNoteColor)
+  const defaultNoteSize = useStore(settingsStore, (state) => state.defaultNoteSize)
+  const defaultNotePlacement = useStore(settingsStore, (state) => state.defaultNotePlacement)
   const moveNote = useStore(notesStore, (state) => state.moveNote)
   const resizeNote = useStore(notesStore, (state) => state.resizeNote)
   const updateNoteText = useStore(notesStore, (state) => state.updateNoteText)
@@ -38,7 +40,11 @@ export default function Board() {
 
     if (!board) return
 
-    createNote(board.clientWidth, board.clientHeight, defaultNoteColor)
+    createNote(board.clientWidth, board.clientHeight, {
+      color: defaultNoteColor,
+      size: defaultNoteSize,
+      placement: defaultNotePlacement,
+    })
   }
 
   return (
@@ -48,6 +54,9 @@ export default function Board() {
       aria-label={t('board.label')}
       aria-busy={loadStatus === NOTES_LOAD_STATUS.LOADING}
     >
+      <header className={styles.header}>
+        <h1 className={styles.title}>{t('app.title')}</h1>
+      </header>
       <Toolbar
         onCreateNote={handleCreateNote}
         disabled={loadStatus !== NOTES_LOAD_STATUS.READY || !size || size.width === 0 || size.height === 0}

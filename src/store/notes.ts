@@ -4,7 +4,7 @@ import type { NotesApi } from '../api/notes/notesApi'
 import { DEFAULT_NOTE_COLOR } from '../constants/noteColors'
 import { DEFAULT_NOTE_SIZE } from '../constants/notes'
 import { NOTES_LOAD_STATUS } from '../constants/notesPersistence'
-import type { NoteColor, NoteData } from '../types/note'
+import type { NoteColor, NoteCreationOptions, NoteData } from '../types/note'
 import type { Position, Size } from '../types/geometry'
 import type { LoadStatus } from '../types/notesPersistence'
 import { clampNotePosition } from '../utils/clampNotePosition'
@@ -19,7 +19,7 @@ type NotesStore = {
   loadNotes: () => Promise<void>
   startNewBoard: () => void
   retrySave: () => void
-  createNote: (boardWidth: number, boardHeight: number, color?: NoteColor) => void
+  createNote: (boardWidth: number, boardHeight: number, options?: NoteCreationOptions) => void
   moveNote: (id: string, position: Position) => void
   resizeNote: (id: string, size: Size) => void
   updateNoteText: (id: string, text: string) => void
@@ -71,16 +71,16 @@ export function createNotesStore(api: NotesApi) {
         set({ notes, loadStatus: NOTES_LOAD_STATUS.READY, hasSaveError: false })
         enqueueSave(notes)
       },
-      createNote: (boardWidth, boardHeight, color = DEFAULT_NOTE_COLOR) => commit((state) => {
-        const position = getNewNotePosition(state.notes, DEFAULT_NOTE_SIZE, {
-          width: boardWidth, height: boardHeight,
-        })
+      createNote: (boardWidth, boardHeight, options = {}) => commit((state) => {
+        const boardSize = { width: boardWidth, height: boardHeight }
+        const size = clampNoteSize(options.size ?? DEFAULT_NOTE_SIZE, { x: 0, y: 0 }, boardSize)
+        const position = getNewNotePosition(state.notes, size, boardSize, options.placement)
         const note: NoteData = {
           id: crypto.randomUUID(),
           ...position,
-          ...DEFAULT_NOTE_SIZE,
+          ...size,
           text: '',
-          color,
+          color: options.color ?? DEFAULT_NOTE_COLOR,
         }
 
         return { notes: [...state.notes, note] }

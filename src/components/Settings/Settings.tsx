@@ -6,6 +6,8 @@ import { Icon } from '../../libs/icons'
 import { notesStore } from '../../store/notes'
 import { settingsStore } from '../../store/settings'
 import ColorPicker from '../ColorPicker/ColorPicker'
+import NotePlacementPicker from './NotePlacementPicker'
+import NoteSizeSettings from './NoteSizeSettings'
 import styles from './Settings.module.css'
 
 export default function Settings() {
@@ -18,6 +20,10 @@ export default function Settings() {
   const deleteAllNotes = useStore(notesStore, (state) => state.deleteAllNotes)
   const defaultNoteColor = useStore(settingsStore, (state) => state.defaultNoteColor)
   const setDefaultNoteColor = useStore(settingsStore, (state) => state.setDefaultNoteColor)
+  const defaultNoteSize = useStore(settingsStore, (state) => state.defaultNoteSize)
+  const setDefaultNoteSize = useStore(settingsStore, (state) => state.setDefaultNoteSize)
+  const defaultNotePlacement = useStore(settingsStore, (state) => state.defaultNotePlacement)
+  const setDefaultNotePlacement = useStore(settingsStore, (state) => state.setDefaultNotePlacement)
   const hasStorageError = useStore(settingsStore, (state) => state.hasStorageError)
 
   useEffect(() => {
@@ -72,6 +78,8 @@ export default function Settings() {
           value={defaultNoteColor}
           onSelect={setDefaultNoteColor}
         />
+        <NoteSizeSettings size={defaultNoteSize} onCommit={setDefaultNoteSize} />
+        <NotePlacementPicker value={defaultNotePlacement} onSelect={setDefaultNotePlacement} />
         {hasStorageError && <p className={styles.error} role="alert">{t('settings.storageFailed')}</p>}
         <div className={styles.deletion}>
           {isConfirmingDelete ? (

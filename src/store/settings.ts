@@ -1,18 +1,34 @@
 import { createStore } from 'zustand/vanilla'
 import { DEFAULT_NOTE_COLOR } from '../constants/noteColors'
+import { DEFAULT_NOTE_PLACEMENT } from '../constants/notePlacements'
+import { DEFAULT_NOTE_SIZE, MAX_DEFAULT_NOTE_HEIGHT } from '../constants/notes'
 import { createJsonStorage, LOCAL_STORAGE_KEYS } from '../libs/storage'
 import type { JsonStorage } from '../libs/storage'
-import type { NoteColor } from '../types/note'
+import type { Size } from '../types/geometry'
+import type { NoteColor, NotePlacement } from '../types/note'
+import { isDefaultNoteSize } from '../utils/isDefaultNoteSize'
 import { isNoteColor } from '../utils/isNoteColor'
+import { isNotePlacement } from '../utils/isNotePlacement'
 
-type SettingsStore = {
+type Preferences = {
   defaultNoteColor: NoteColor
+  defaultNoteSize: Size
+  defaultNotePlacement: NotePlacement
+}
+
+type SettingsStore = Preferences & {
   hasStorageError: boolean
   setDefaultNoteColor: (color: NoteColor) => void
+  setDefaultNoteSize: (size: Size) => void
+  setDefaultNotePlacement: (placement: NotePlacement) => void
 }
 
 export function createSettingsStore(storage: JsonStorage = createJsonStorage()) {
-  let defaultNoteColor: NoteColor = DEFAULT_NOTE_COLOR
+  let preferences: Preferences = {
+    defaultNoteColor: DEFAULT_NOTE_COLOR,
+    defaultNoteSize: DEFAULT_NOTE_SIZE,
+    defaultNotePlacement: DEFAULT_NOTE_PLACEMENT,
+  }
   let hasStorageError = false
 
   try {
@@ -22,26 +38,56 @@ export function createSettingsStore(storage: JsonStorage = createJsonStorage()) 
         !('defaultNoteColor' in saved) || !isNoteColor(saved.defaultNoteColor)) {
         throw new Error('Saved settings contain an invalid note color')
       }
-      defaultNoteColor = saved.defaultNoteColor
+      let size = 'defaultNoteSize' in saved ? saved.defaultNoteSize : DEFAULT_NOTE_SIZE
+      if (typeof size === 'object' && size !== null &&
+        'height' in size && typeof size.height === 'number' &&
+        Number.isSafeInteger(size.height) && size.height > MAX_DEFAULT_NOTE_HEIGHT) {
+        size = { ...size, height: MAX_DEFAULT_NOTE_HEIGHT }
+      }
+      const placement = 'defaultNotePlacement' in saved ? saved.defaultNotePlacement : DEFAULT_NOTE_PLACEMENT
+      if (!isDefaultNoteSize(size) || !isNotePlacement(placement)) {
+        throw new Error('Saved settings contain invalid note geometry')
+      }
+      preferences = { defaultNoteColor: saved.defaultNoteColor, defaultNoteSize: size, defaultNotePlacement: placement }
     }
   } catch {
     hasStorageError = true
   }
 
-  return createStore<SettingsStore>()((set, get) => ({
-    defaultNoteColor,
-    hasStorageError,
-    setDefaultNoteColor: (color) => {
-      if (get().defaultNoteColor === color && !get().hasStorageError) return
+  return createStore<SettingsStore>()((set, get) => {
+    function updatePreferences(patch: Partial<Preferences>) {
+      const current = get()
+      const next: Preferences = {
+        defaultNoteColor: current.defaultNoteColor,
+        defaultNoteSize: current.defaultNoteSize,
+        defaultNotePlacement: current.defaultNotePlacement,
+        ...patch,
+      }
+      const unchanged = next.defaultNoteColor === current.defaultNoteColor &&
+        next.defaultNotePlacement === current.defaultNotePlacement &&
+        next.defaultNoteSize.width === current.defaultNoteSize.width &&
+        next.defaultNoteSize.height === current.defaultNoteSize.height
+      if (unchanged && !current.hasStorageError) return
+
       let failed = false
       try {
-        storage.write(LOCAL_STORAGE_KEYS.SETTINGS, { defaultNoteColor: color })
+        storage.write(LOCAL_STORAGE_KEYS.SETTINGS, next)
       } catch {
         failed = true
       }
-      set({ defaultNoteColor: color, hasStorageError: failed })
-    },
-  }))
+      set({ ...next, hasStorageError: failed })
+    }
+
+    return {
+      ...preferences,
+      hasStorageError,
+      setDefaultNoteColor: (color) => updatePreferences({ defaultNoteColor: color }),
+      setDefaultNoteSize: (size) => {
+        if (isDefaultNoteSize(size)) updatePreferences({ defaultNoteSize: { ...size } })
+      },
+      setDefaultNotePlacement: (placement) => updatePreferences({ defaultNotePlacement: placement }),
+    }
+  })
 }
 
 export const settingsStore = createSettingsStore()
