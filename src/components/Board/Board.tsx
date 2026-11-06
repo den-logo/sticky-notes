@@ -12,6 +12,7 @@ export default function Board() {
   const notes = useStore(notesStore, (state) => state.notes)
   const createNote = useStore(notesStore, (state) => state.createNote)
   const moveNote = useStore(notesStore, (state) => state.moveNote)
+  const resizeNote = useStore(notesStore, (state) => state.resizeNote)
   const constrainNotes = useStore(notesStore, (state) => state.constrainNotes)
 
   useLayoutEffect(() => {
@@ -35,7 +36,13 @@ export default function Board() {
       {notes.length === 0 && <p className={styles.emptyState}>{t('board.emptyState')}</p>}
       <div className={styles.notesLayer}>
         {size && notes.map((note) => (
-          <Note key={note.id} note={note} boardSize={size} onMove={moveNote} />
+          <Note
+            key={note.id}
+            note={note}
+            boardSize={size}
+            onMove={moveNote}
+            onResize={resizeNote}
+          />
         ))}
       </div>
     </section>

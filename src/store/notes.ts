@@ -3,11 +3,13 @@ import { DEFAULT_NOTE_SIZE } from '../constants/notes'
 import type { NoteData } from '../types/note'
 import type { Position, Size } from '../types/geometry'
 import { clampNotePosition } from '../utils/clampNotePosition'
+import { clampNoteSize } from '../utils/clampNoteSize'
 
 type NotesStore = {
   notes: NoteData[]
   createNote: (boardWidth: number, boardHeight: number) => void
   moveNote: (id: string, position: Position) => void
+  resizeNote: (id: string, size: Size) => void
   constrainNotes: (boardSize: Size) => void
 }
 
@@ -39,13 +41,30 @@ export function createNotesStore() {
         ],
       }
     }),
+    resizeNote: (id, size) => set((state) => {
+      const note = state.notes.find((item) => item.id === id)
+      if (!note) return state
+
+      const hasResized = note.width !== size.width || note.height !== size.height
+      if (!hasResized && state.notes.at(-1) === note) return state
+
+      return {
+        notes: [
+          ...state.notes.filter((item) => item.id !== id),
+          hasResized ? { ...note, ...size } : note,
+        ],
+      }
+    }),
     constrainNotes: (boardSize) => set((state) => {
       let changed = false
       const notes = state.notes.map((note) => {
-        const position = clampNotePosition(note, note, boardSize)
-        if (note.x === position.x && note.y === position.y) return note
+        const size = clampNoteSize(note, { x: 0, y: 0 }, boardSize)
+        const position = clampNotePosition(note, size, boardSize)
+        const isUnchanged = note.x === position.x && note.y === position.y &&
+          note.width === size.width && note.height === size.height
+        if (isUnchanged) return note
         changed = true
-        return { ...note, ...position }
+        return { ...note, ...position, ...size }
       })
       return changed ? { notes } : state
     }),

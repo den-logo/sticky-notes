@@ -6,7 +6,9 @@
   background: var(--color-note-yellow);
 }
 
-.note[data-dragging] {
+.note[data-dragging],
+.note[data-resizing],
+.note:has(.dragHandle:focus-visible, .resizeHandle:focus-visible) {
   z-index: 1;
 }
 
@@ -29,6 +31,33 @@
 .dragHandle:focus-visible {
   outline: 2px solid var(--color-text);
   outline-offset: -3px;
+}
+
+.resizeHandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: var(--note-resize-handle-size);
+  height: var(--note-resize-handle-size);
+  padding: 0;
+  border: 0;
+  color: var(--color-note-grip);
+  background: transparent;
+  cursor: nwse-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.resizeHandle:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: -3px;
+}
+
+.resizeHandle:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .note[data-dragging] .dragHandle {
