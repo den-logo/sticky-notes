@@ -2,7 +2,7 @@
   position: absolute;
   top: var(--space-6);
   right: var(--space-8);
-  z-index: 1;
+  z-index: var(--layer-toolbar);
 }
 
 .createButton {

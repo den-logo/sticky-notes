@@ -4,6 +4,7 @@ import { t } from '../../libs/i18n'
 import { Icon } from '../../libs/icons'
 import type { Position, Size } from '../../types/geometry'
 import type { NoteData } from '../../types/note'
+import type { NoteDragHandlers } from '../../types/noteDrag'
 import styles from './Note.module.css'
 import NoteText from './NoteText'
 
@@ -13,16 +14,18 @@ type NoteProps = {
   onMove: (id: string, position: Position) => void
   onResize: (id: string, size: Size) => void
   onTextCommit: (id: string, text: string) => void
+  dragHandlers: NoteDragHandlers
 }
 
-export default function Note({ note, boardSize, onMove, onResize, onTextCommit }: NoteProps) {
-  const { geometry, isDragging, isResizing, moveHandleProps, resizeHandleProps } =
-    useNoteInteraction({ note, boardSize, onMove, onResize })
+export default function Note({ note, boardSize, onMove, onResize, onTextCommit, dragHandlers }: NoteProps) {
+  const { noteRef, geometry, visualStyle, isDragging, isResizing, moveHandleProps, resizeHandleProps } =
+    useNoteInteraction({ note, boardSize, onMove, onResize, dragHandlers })
   const canResize = boardSize.width - note.x >= MIN_NOTE_SIZE.width &&
     boardSize.height - note.y >= MIN_NOTE_SIZE.height
 
   return (
     <article
+      ref={noteRef}
       className={styles.note}
       data-dragging={isDragging || undefined}
       data-resizing={isResizing || undefined}
@@ -31,6 +34,7 @@ export default function Note({ note, boardSize, onMove, onResize, onTextCommit }
         top: geometry.y,
         width: geometry.width,
         height: geometry.height,
+        ...visualStyle,
       }}
     >
       <button

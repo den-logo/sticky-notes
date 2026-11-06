@@ -1,10 +1,12 @@
 import { useLayoutEffect } from 'react'
 import { useStore } from 'zustand'
 import { useElementSize } from '../../hooks/useElementSize'
+import { useTrashZone } from '../../hooks/useTrashZone'
 import { t } from '../../libs/i18n'
 import { notesStore } from '../../store/notes'
 import Note from '../Note/Note'
 import Toolbar from '../Toolbar/Toolbar'
+import TrashZone from '../TrashZone/TrashZone'
 import styles from './Board.module.css'
 
 export default function Board() {
@@ -14,7 +16,9 @@ export default function Board() {
   const moveNote = useStore(notesStore, (state) => state.moveNote)
   const resizeNote = useStore(notesStore, (state) => state.resizeNote)
   const updateNoteText = useStore(notesStore, (state) => state.updateNoteText)
+  const deleteNote = useStore(notesStore, (state) => state.deleteNote)
   const constrainNotes = useStore(notesStore, (state) => state.constrainNotes)
+  const trash = useTrashZone(deleteNote)
 
   useLayoutEffect(() => {
     if (size && size.width > 0 && size.height > 0) constrainNotes(size)
@@ -44,9 +48,11 @@ export default function Board() {
             onMove={moveNote}
             onResize={resizeNote}
             onTextCommit={updateNoteText}
+            dragHandlers={trash.dragHandlers}
           />
         ))}
       </div>
+      <TrashZone ref={trash.ref} isVisible={trash.isVisible} isOver={trash.isOver} />
     </section>
   )
 }

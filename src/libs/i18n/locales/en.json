@@ -9,6 +9,8 @@
   "note.resizeHint": "Drag to resize, or use the arrow keys. Enter or Space brings to front. Escape cancels a resize.",
   "note.text": "Note text",
   "note.textPlaceholder": "Write something…",
+  "trash.dragToDelete": "Drag here to delete",
+  "trash.releaseToDelete": "Release to delete",
   "viewport.title": "A little more room, please",
   "viewport.description": "Sticky Notes needs a browser window at least 1024 pixels wide. Widen your window to use the board."
 }

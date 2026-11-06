@@ -15,6 +15,14 @@
   --color-control-background: #342d20;
   --color-control-hover: #4a3920;
   --color-control-text: #fff6dc;
+  --color-trash-background: #fff2d8;
+  --color-trash-border: #aa8051;
+  --color-trash-text: #59402b;
+  --shadow-trash-active: 0 3px 10px rgb(74 57 32 / 14%);
+  --layer-raised-note: 1;
+  --layer-trash: 2;
+  --layer-dragging-note: 3;
+  --layer-toolbar: 4;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;

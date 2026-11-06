@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { KeyboardEvent, MouseEvent, PointerEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, MouseEvent, PointerEvent } from 'react'
+import { MIN_DRAG_NOTE_SCALE } from '../constants/trash'
 import type { Position, Size } from '../types/geometry'
 import type { NoteData } from '../types/note'
+import type { NoteDragHandlers } from '../types/noteDrag'
 import { clampNotePosition } from '../utils/clampNotePosition'
 import { clampNoteSize } from '../utils/clampNoteSize'
 
@@ -14,6 +16,15 @@ type InteractionSession = {
   target: HTMLButtonElement
   pointerStart: Position
   geometryStart: Geometry
+  grabOffset: Position
+  boardOffset: Position
+  hasDragged: boolean
+}
+
+type InteractionDraft = {
+  kind: InteractionKind
+  geometry: Geometry
+  visualStyle?: CSSProperties
 }
 
 type NoteInteractionOptions = {
@@ -21,7 +32,10 @@ type NoteInteractionOptions = {
   boardSize: Size
   onMove: (id: string, position: Position) => void
   onResize: (id: string, size: Size) => void
+  dragHandlers: NoteDragHandlers
 }
+
+const DRAG_ACTIVATION_DISTANCE = 4
 
 const KEYBOARD_DIRECTIONS: Record<string, Position> = {
   ArrowLeft: { x: -10, y: 0 },
@@ -30,9 +44,10 @@ const KEYBOARD_DIRECTIONS: Record<string, Position> = {
   ArrowDown: { x: 0, y: 10 },
 }
 
-export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteInteractionOptions) {
+export function useNoteInteraction({ note, boardSize, onMove, onResize, dragHandlers }: NoteInteractionOptions) {
   const session = useRef<InteractionSession | null>(null)
-  const [draft, setDraft] = useState<{ kind: InteractionKind; geometry: Geometry } | null>(null)
+  const noteRef = useRef<HTMLElement>(null)
+  const [draft, setDraft] = useState<InteractionDraft | null>(null)
   const isActive = draft !== null
 
   const cancelInteraction = useCallback(() => {
@@ -44,7 +59,8 @@ export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteIn
     if (active.target.hasPointerCapture(active.pointerId)) {
       active.target.releasePointerCapture(active.pointerId)
     }
-  }, [])
+    if (active.kind === 'move') dragHandlers.onEnd()
+  }, [dragHandlers.onEnd])
 
   useEffect(() => {
     if (!isActive) return
@@ -92,8 +108,36 @@ export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteIn
     else onResize(note.id, { width: geometry.width, height: geometry.height })
   }
 
+  function getDraft(event: PointerEvent<HTMLButtonElement>, active: InteractionSession, proximity: number): InteractionDraft {
+    const geometry = getGeometry(event, active)
+    if (active.kind === 'resize') return { kind: active.kind, geometry }
+
+    const scale = 1 - (1 - MIN_DRAG_NOTE_SCALE) * proximity
+    const grab = active.grabOffset
+    // Fit the scaled bounds around the grab point without changing the stored dimensions.
+    const visualPosition = clampNotePosition({
+      x: event.clientX - active.boardOffset.x - grab.x * scale,
+      y: event.clientY - active.boardOffset.y - grab.y * scale,
+    }, { width: geometry.width * scale, height: geometry.height * scale }, boardSize)
+    const offset = {
+      x: visualPosition.x - geometry.x - (1 - scale) * grab.x,
+      y: visualPosition.y - geometry.y - (1 - scale) * grab.y,
+    }
+
+    return {
+      kind: active.kind,
+      geometry,
+      visualStyle: {
+        transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+        transformOrigin: `${grab.x}px ${grab.y}px`,
+      },
+    }
+  }
+
   function onPointerDown(event: PointerEvent<HTMLButtonElement>, kind: InteractionKind) {
     if (event.button !== 0 || !event.isPrimary || session.current) return
+    const bounds = noteRef.current?.getBoundingClientRect()
+    if (!bounds) return
 
     event.preventDefault()
     event.currentTarget.focus({ preventScroll: true })
@@ -104,8 +148,12 @@ export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteIn
       target: event.currentTarget,
       pointerStart: { x: event.clientX, y: event.clientY },
       geometryStart: { x: note.x, y: note.y, width: note.width, height: note.height },
+      grabOffset: { x: event.clientX - bounds.left, y: event.clientY - bounds.top },
+      boardOffset: { x: bounds.left - note.x, y: bounds.top - note.y },
+      hasDragged: false,
     }
-    setDraft({ kind, geometry: session.current.geometryStart })
+    const proximity = kind === 'move' ? dragHandlers.onStart({ x: event.clientX, y: event.clientY }) : 0
+    setDraft(getDraft(event, session.current, proximity))
   }
 
   function onPointerMove(event: PointerEvent<HTMLButtonElement>) {
@@ -115,7 +163,12 @@ export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteIn
       cancelInteraction()
       return
     }
-    setDraft({ kind: active.kind, geometry: getGeometry(event, active) })
+    active.hasDragged ||= Math.hypot(
+      event.clientX - active.pointerStart.x,
+      event.clientY - active.pointerStart.y,
+    ) >= DRAG_ACTIVATION_DISTANCE
+    const proximity = active.kind === 'move' ? dragHandlers.onMove({ x: event.clientX, y: event.clientY }) : 0
+    setDraft(getDraft(event, active, proximity))
   }
 
   function onPointerUp(event: PointerEvent<HTMLButtonElement>) {
@@ -127,6 +180,15 @@ export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteIn
     setDraft(null)
     if (active.target.hasPointerCapture(active.pointerId)) {
       active.target.releasePointerCapture(active.pointerId)
+    }
+    if (active.kind === 'move') {
+      const hasDragged = active.hasDragged || Math.hypot(
+        event.clientX - active.pointerStart.x,
+        event.clientY - active.pointerStart.y,
+      ) >= DRAG_ACTIVATION_DISTANCE
+      const deleted = hasDragged && dragHandlers.onDrop(note.id, { x: event.clientX, y: event.clientY })
+      dragHandlers.onEnd()
+      if (deleted) return
     }
     commit(active.kind, geometry)
   }
@@ -169,6 +231,8 @@ export function useNoteInteraction({ note, boardSize, onMove, onResize }: NoteIn
   }
 
   return {
+    noteRef,
+    visualStyle: draft?.visualStyle,
     geometry: draft?.geometry ?? note,
     isDragging: draft?.kind === 'move',
     isResizing: draft?.kind === 'resize',
