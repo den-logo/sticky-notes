@@ -8,6 +8,7 @@ import type { Position, Size } from '../types/geometry'
 import type { LoadStatus } from '../types/notesPersistence'
 import { clampNotePosition } from '../utils/clampNotePosition'
 import { clampNoteSize } from '../utils/clampNoteSize'
+import { getNewNotePosition } from '../utils/getNewNotePosition'
 import { createNotesSaveQueue } from './createNotesSaveQueue'
 
 type NotesStore = {
@@ -67,18 +68,19 @@ export function createNotesStore(api: NotesApi) {
         set({ notes, loadStatus: NOTES_LOAD_STATUS.READY, hasSaveError: false })
         enqueueSave(notes)
       },
-      createNote: (boardWidth, boardHeight) => {
-        if (get().loadStatus !== NOTES_LOAD_STATUS.READY) return
+      createNote: (boardWidth, boardHeight) => commit((state) => {
+        const position = getNewNotePosition(state.notes, DEFAULT_NOTE_SIZE, {
+          width: boardWidth, height: boardHeight,
+        })
         const note: NoteData = {
           id: crypto.randomUUID(),
-          x: Math.max(0, (boardWidth - DEFAULT_NOTE_SIZE.width) / 2),
-          y: Math.max(0, (boardHeight - DEFAULT_NOTE_SIZE.height) / 2),
+          ...position,
           ...DEFAULT_NOTE_SIZE,
           text: '',
         }
 
-        commit((state) => ({ notes: [...state.notes, note] }))
-      },
+        return { notes: [...state.notes, note] }
+      }),
       moveNote: (id, position) => commit((state) => {
         const note = state.notes.find((item) => item.id === id)
         if (!note) return state
