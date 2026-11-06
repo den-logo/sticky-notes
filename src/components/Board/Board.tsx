@@ -13,6 +13,7 @@ export default function Board() {
   const createNote = useStore(notesStore, (state) => state.createNote)
   const moveNote = useStore(notesStore, (state) => state.moveNote)
   const resizeNote = useStore(notesStore, (state) => state.resizeNote)
+  const updateNoteText = useStore(notesStore, (state) => state.updateNoteText)
   const constrainNotes = useStore(notesStore, (state) => state.constrainNotes)
 
   useLayoutEffect(() => {
@@ -42,6 +43,7 @@ export default function Board() {
             boardSize={size}
             onMove={moveNote}
             onResize={resizeNote}
+            onTextCommit={updateNoteText}
           />
         ))}
       </div>

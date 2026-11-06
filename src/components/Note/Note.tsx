@@ -5,15 +5,17 @@ import { Icon } from '../../libs/icons'
 import type { Position, Size } from '../../types/geometry'
 import type { NoteData } from '../../types/note'
 import styles from './Note.module.css'
+import NoteText from './NoteText'
 
 type NoteProps = {
   note: NoteData
   boardSize: Size
   onMove: (id: string, position: Position) => void
   onResize: (id: string, size: Size) => void
+  onTextCommit: (id: string, text: string) => void
 }
 
-export default function Note({ note, boardSize, onMove, onResize }: NoteProps) {
+export default function Note({ note, boardSize, onMove, onResize, onTextCommit }: NoteProps) {
   const { geometry, isDragging, isResizing, moveHandleProps, resizeHandleProps } =
     useNoteInteraction({ note, boardSize, onMove, onResize })
   const canResize = boardSize.width - note.x >= MIN_NOTE_SIZE.width &&
@@ -40,7 +42,7 @@ export default function Note({ note, boardSize, onMove, onResize }: NoteProps) {
       >
         <span className={styles.grip} aria-hidden="true" />
       </button>
-      <p className={styles.text}>{note.text}</p>
+      <NoteText text={note.text} onCommit={(text) => onTextCommit(note.id, text)} />
       <button
         type="button"
         className={styles.resizeHandle}

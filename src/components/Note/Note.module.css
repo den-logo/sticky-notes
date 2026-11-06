@@ -1,5 +1,7 @@
 .note {
   position: absolute;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid var(--color-note-border);
   border-radius: var(--radius-note);
@@ -8,12 +10,13 @@
 
 .note[data-dragging],
 .note[data-resizing],
-.note:has(.dragHandle:focus-visible, .resizeHandle:focus-visible) {
+.note:has(.dragHandle:focus-visible, .resizeHandle:focus-visible, textarea:focus) {
   z-index: 1;
 }
 
 .dragHandle {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 100%;
@@ -68,12 +71,4 @@
   width: var(--space-6);
   height: 4px;
   border-block: 1px solid currentColor;
-}
-
-.text {
-  padding: var(--space-4) var(--space-6);
-  font-size: var(--font-size-md);
-  line-height: 1.6;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
 }

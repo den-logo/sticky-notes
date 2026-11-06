@@ -1,0 +1,63 @@
+.content {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+}
+
+.preview,
+.editor {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.preview {
+  pointer-events: none;
+}
+
+.previewViewport {
+  height: 100%;
+  overflow: hidden;
+}
+
+.previewText {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: pre-wrap;
+  -webkit-box-orient: vertical;
+}
+
+.previewText[data-placeholder],
+.editor::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.editor {
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  resize: none;
+}
+
+/* Keep the native editor mounted for focus, caret placement, and text selection. */
+.editor:not(:focus) {
+  overflow: hidden;
+  opacity: 0;
+}
+
+.content:focus-within .preview {
+  visibility: hidden;
+}
+
+.editor:focus-visible {
+  outline: 2px solid var(--color-note-grip);
+  outline-offset: -3px;
+}

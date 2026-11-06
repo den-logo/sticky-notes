@@ -10,6 +10,7 @@ type NotesStore = {
   createNote: (boardWidth: number, boardHeight: number) => void
   moveNote: (id: string, position: Position) => void
   resizeNote: (id: string, size: Size) => void
+  updateNoteText: (id: string, text: string) => void
   constrainNotes: (boardSize: Size) => void
 }
 
@@ -53,6 +54,14 @@ export function createNotesStore() {
           ...state.notes.filter((item) => item.id !== id),
           hasResized ? { ...note, ...size } : note,
         ],
+      }
+    }),
+    updateNoteText: (id, text) => set((state) => {
+      const note = state.notes.find((item) => item.id === id)
+      if (!note || note.text === text) return state
+
+      return {
+        notes: state.notes.map((item) => item.id === id ? { ...item, text } : item),
       }
     }),
     constrainNotes: (boardSize) => set((state) => {
