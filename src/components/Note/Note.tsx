@@ -27,6 +27,7 @@ export default function Note({ note, boardSize, onMove, onResize, onTextCommit, 
     <article
       ref={noteRef}
       className={styles.note}
+      data-color={note.color}
       data-dragging={isDragging || undefined}
       data-resizing={isResizing || undefined}
       style={{

@@ -27,7 +27,7 @@ The build checks TypeScript and writes the production files to `dist/`.
 ## Architecture
 
 Components handle the board and notes; hooks handle dragging and resizing.
-Zustand stores note data, while temporary edits stay local until committed.
+Zustand stores notes and preferences, while temporary edits stay local until committed.
 Text is also committed when the page is hidden. Components use CSS Modules,
 with shared design tokens in global CSS. Icons, UI strings and storage utilities
 live in `src/libs`.

@@ -1,5 +1,7 @@
+import { DEFAULT_NOTE_COLOR } from '../../constants/noteColors'
 import { MIN_NOTE_SIZE } from '../../constants/notes'
-import type { NoteData } from '../../types/note'
+import type { NoteColor, NoteData } from '../../types/note'
+import { isNoteColor } from '../../utils/isNoteColor'
 
 const SNAPSHOT_VERSION = 1
 
@@ -11,10 +13,11 @@ function isFiniteNumber(value: unknown, minimum: number): value is number {
   return typeof value === 'number' && Number.isFinite(value) && value >= minimum
 }
 
-function isNote(value: unknown): value is NoteData {
+function isNote(value: unknown): value is Omit<NoteData, 'color'> & { color?: NoteColor } {
   return isRecord(value) &&
     typeof value.id === 'string' && value.id.trim().length > 0 &&
     typeof value.text === 'string' &&
+    (value.color === undefined || isNoteColor(value.color)) &&
     isFiniteNumber(value.x, 0) && isFiniteNumber(value.y, 0) &&
     isFiniteNumber(value.width, MIN_NOTE_SIZE.width) &&
     isFiniteNumber(value.height, MIN_NOTE_SIZE.height)
@@ -32,6 +35,7 @@ export function parseNotesSnapshot(value: unknown): NoteData[] {
     return {
       id: item.id, x: item.x, y: item.y,
       width: item.width, height: item.height, text: item.text,
+      color: item.color ?? DEFAULT_NOTE_COLOR,
     }
   })
 }

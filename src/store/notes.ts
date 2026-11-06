@@ -1,9 +1,10 @@
 import { createStore } from 'zustand/vanilla'
 import { createLocalNotesApi } from '../api/notes/localNotesApi'
 import type { NotesApi } from '../api/notes/notesApi'
+import { DEFAULT_NOTE_COLOR } from '../constants/noteColors'
 import { DEFAULT_NOTE_SIZE } from '../constants/notes'
 import { NOTES_LOAD_STATUS } from '../constants/notesPersistence'
-import type { NoteData } from '../types/note'
+import type { NoteColor, NoteData } from '../types/note'
 import type { Position, Size } from '../types/geometry'
 import type { LoadStatus } from '../types/notesPersistence'
 import { clampNotePosition } from '../utils/clampNotePosition'
@@ -18,11 +19,12 @@ type NotesStore = {
   loadNotes: () => Promise<void>
   startNewBoard: () => void
   retrySave: () => void
-  createNote: (boardWidth: number, boardHeight: number) => void
+  createNote: (boardWidth: number, boardHeight: number, color?: NoteColor) => void
   moveNote: (id: string, position: Position) => void
   resizeNote: (id: string, size: Size) => void
   updateNoteText: (id: string, text: string) => void
   deleteNote: (id: string) => void
+  deleteAllNotes: () => void
   constrainNotes: (boardSize: Size) => void
 }
 
@@ -68,7 +70,7 @@ export function createNotesStore(api: NotesApi) {
         set({ notes, loadStatus: NOTES_LOAD_STATUS.READY, hasSaveError: false })
         enqueueSave(notes)
       },
-      createNote: (boardWidth, boardHeight) => commit((state) => {
+      createNote: (boardWidth, boardHeight, color = DEFAULT_NOTE_COLOR) => commit((state) => {
         const position = getNewNotePosition(state.notes, DEFAULT_NOTE_SIZE, {
           width: boardWidth, height: boardHeight,
         })
@@ -77,6 +79,7 @@ export function createNotesStore(api: NotesApi) {
           ...position,
           ...DEFAULT_NOTE_SIZE,
           text: '',
+          color,
         }
 
         return { notes: [...state.notes, note] }
@@ -121,6 +124,7 @@ export function createNotesStore(api: NotesApi) {
         const notes = state.notes.filter((note) => note.id !== id)
         return notes.length === state.notes.length ? state : { notes }
       }),
+      deleteAllNotes: () => commit((state) => state.notes.length === 0 ? state : { notes: [] }),
       constrainNotes: (boardSize) => commit((state) => {
         let changed = false
         const notes = state.notes.map((note) => {

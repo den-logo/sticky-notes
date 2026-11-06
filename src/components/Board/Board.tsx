@@ -5,6 +5,7 @@ import { useElementSize } from '../../hooks/useElementSize'
 import { useTrashZone } from '../../hooks/useTrashZone'
 import { t } from '../../libs/i18n'
 import { notesStore } from '../../store/notes'
+import { settingsStore } from '../../store/settings'
 import Note from '../Note/Note'
 import PersistenceStatus from '../PersistenceStatus/PersistenceStatus'
 import Toolbar from '../Toolbar/Toolbar'
@@ -17,6 +18,7 @@ export default function Board() {
   const loadStatus = useStore(notesStore, (state) => state.loadStatus)
   const loadNotes = useStore(notesStore, (state) => state.loadNotes)
   const createNote = useStore(notesStore, (state) => state.createNote)
+  const defaultNoteColor = useStore(settingsStore, (state) => state.defaultNoteColor)
   const moveNote = useStore(notesStore, (state) => state.moveNote)
   const resizeNote = useStore(notesStore, (state) => state.resizeNote)
   const updateNoteText = useStore(notesStore, (state) => state.updateNoteText)
@@ -35,7 +37,7 @@ export default function Board() {
 
     if (!board) return
 
-    createNote(board.clientWidth, board.clientHeight)
+    createNote(board.clientWidth, board.clientHeight, defaultNoteColor)
   }
 
   return (
