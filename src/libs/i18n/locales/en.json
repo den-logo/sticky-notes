@@ -1,8 +1,8 @@
 {
   "app.title": "Tempo Sticky Notes",
   "board.label": "Sticky notes board",
-  "board.welcomeTitle": "A place for your thoughts",
-  "board.welcomeText": "Ideas, reminders, and everything worth keeping.",
+  "board.emptyState": "A little space for your next idea.\nCreate a note to get started.",
+  "toolbar.createNote": "Add note",
   "viewport.title": "A little more room, please",
   "viewport.description": "Sticky Notes needs a browser window at least 1024 pixels wide. Widen your window to use the board."
 }

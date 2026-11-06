@@ -1,9 +1,15 @@
 .note {
-  width: 250px;
-  height: 250px;
+  position: absolute;
   padding: var(--space-6);
   overflow: hidden;
   border: 1px solid var(--color-note-border);
   border-radius: var(--radius-note);
   background: var(--color-note-yellow);
+}
+
+.text {
+  font-size: var(--font-size-md);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

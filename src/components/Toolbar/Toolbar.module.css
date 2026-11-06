@@ -1,0 +1,38 @@
+.toolbar {
+  position: absolute;
+  top: var(--space-6);
+  right: var(--space-8);
+  z-index: 1;
+}
+
+.createButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: var(--control-size);
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-control);
+  color: var(--color-control-text);
+  background: var(--color-control-background);
+  font: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.createButton:hover:not(:disabled) {
+  background: var(--color-control-hover);
+}
+
+.createButton:focus-visible {
+  outline: 2px solid var(--color-control-background);
+  outline-offset: 3px;
+}
+
+.createButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
