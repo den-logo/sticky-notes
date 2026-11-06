@@ -11,6 +11,11 @@
   "note.textPlaceholder": "Write something…",
   "trash.dragToDelete": "Drag here to delete",
   "trash.releaseToDelete": "Release to delete",
+  "persistence.loadFailed": "We couldn't load your saved notes. Your saved data hasn't been changed.",
+  "persistence.saveFailed": "Changes couldn't be saved. Keep this tab open and try again.",
+  "persistence.retry": "Try again",
+  "persistence.startNewBoard": "Start a new board",
+  "persistence.startNewBoardHint": "Starting a new board will replace the saved notes.",
   "viewport.title": "A little more room, please",
   "viewport.description": "Sticky Notes needs a browser window at least 1024 pixels wide. Widen your window to use the board."
 }

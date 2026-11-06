@@ -1,12 +1,22 @@
 import { createStore } from 'zustand/vanilla'
+import { createLocalNotesApi } from '../api/notes/localNotesApi'
+import type { NotesApi } from '../api/notes/notesApi'
 import { DEFAULT_NOTE_SIZE } from '../constants/notes'
+import { NOTES_LOAD_STATUS } from '../constants/notesPersistence'
 import type { NoteData } from '../types/note'
 import type { Position, Size } from '../types/geometry'
+import type { LoadStatus } from '../types/notesPersistence'
 import { clampNotePosition } from '../utils/clampNotePosition'
 import { clampNoteSize } from '../utils/clampNoteSize'
+import { createNotesSaveQueue } from './createNotesSaveQueue'
 
 type NotesStore = {
   notes: NoteData[]
+  loadStatus: LoadStatus
+  hasSaveError: boolean
+  loadNotes: () => Promise<void>
+  startNewBoard: () => void
+  retrySave: () => void
   createNote: (boardWidth: number, boardHeight: number) => void
   moveNote: (id: string, position: Position) => void
   resizeNote: (id: string, size: Size) => void
@@ -15,74 +25,115 @@ type NotesStore = {
   constrainNotes: (boardSize: Size) => void
 }
 
-export function createNotesStore() {
-  return createStore<NotesStore>()((set) => ({
-    notes: [],
-    createNote: (boardWidth, boardHeight) => {
-      const note: NoteData = {
-        id: crypto.randomUUID(),
-        x: Math.max(0, (boardWidth - DEFAULT_NOTE_SIZE.width) / 2),
-        y: Math.max(0, (boardHeight - DEFAULT_NOTE_SIZE.height) / 2),
-        ...DEFAULT_NOTE_SIZE,
-        text: '',
-      }
+export function createNotesStore(api: NotesApi) {
+  let loading: Promise<void> | null = null
+  return createStore<NotesStore>()((set, get) => {
+    const enqueueSave = createNotesSaveQueue(api, (hasSaveError) => {
+      set((state) => state.hasSaveError === hasSaveError ? state : { hasSaveError })
+    })
 
-      set((state) => ({ notes: [...state.notes, note] }))
-    },
-    moveNote: (id, position) => set((state) => {
-      const note = state.notes.find((item) => item.id === id)
-      if (!note) return state
+    function commit(update: (state: NotesStore) => NotesStore | { notes: NoteData[] }) {
+      const previous = get()
+      if (previous.loadStatus !== NOTES_LOAD_STATUS.READY) return
+      const next = update(previous)
+      if (next.notes === previous.notes) return
+      set({ notes: next.notes, hasSaveError: false })
+      enqueueSave(next.notes)
+    }
 
-      const hasMoved = note.x !== position.x || note.y !== position.y
-      if (!hasMoved && state.notes.at(-1) === note) return state
+    return {
+      notes: [],
+      loadStatus: NOTES_LOAD_STATUS.LOADING,
+      hasSaveError: false,
+      loadNotes: () => {
+        if (get().loadStatus === NOTES_LOAD_STATUS.READY) return Promise.resolve()
+        if (loading) return loading
+        set({ loadStatus: NOTES_LOAD_STATUS.LOADING })
+        loading = Promise.resolve()
+          .then(() => api.loadNotes())
+          .then((notes) => set({ notes, loadStatus: NOTES_LOAD_STATUS.READY }))
+          .catch(() => set({ loadStatus: NOTES_LOAD_STATUS.ERROR }))
+          .finally(() => { loading = null })
+        return loading
+      },
+      retrySave: () => {
+        if (get().loadStatus === NOTES_LOAD_STATUS.READY && get().hasSaveError) {
+          enqueueSave(get().notes)
+        }
+      },
+      startNewBoard: () => {
+        if (get().loadStatus !== NOTES_LOAD_STATUS.ERROR) return
+        const notes: NoteData[] = []
+        set({ notes, loadStatus: NOTES_LOAD_STATUS.READY, hasSaveError: false })
+        enqueueSave(notes)
+      },
+      createNote: (boardWidth, boardHeight) => {
+        if (get().loadStatus !== NOTES_LOAD_STATUS.READY) return
+        const note: NoteData = {
+          id: crypto.randomUUID(),
+          x: Math.max(0, (boardWidth - DEFAULT_NOTE_SIZE.width) / 2),
+          y: Math.max(0, (boardHeight - DEFAULT_NOTE_SIZE.height) / 2),
+          ...DEFAULT_NOTE_SIZE,
+          text: '',
+        }
 
-      return {
-        notes: [
-          ...state.notes.filter((item) => item.id !== id),
-          hasMoved ? { ...note, ...position } : note,
-        ],
-      }
-    }),
-    resizeNote: (id, size) => set((state) => {
-      const note = state.notes.find((item) => item.id === id)
-      if (!note) return state
+        commit((state) => ({ notes: [...state.notes, note] }))
+      },
+      moveNote: (id, position) => commit((state) => {
+        const note = state.notes.find((item) => item.id === id)
+        if (!note) return state
 
-      const hasResized = note.width !== size.width || note.height !== size.height
-      if (!hasResized && state.notes.at(-1) === note) return state
+        const hasMoved = note.x !== position.x || note.y !== position.y
+        if (!hasMoved && state.notes.at(-1) === note) return state
 
-      return {
-        notes: [
-          ...state.notes.filter((item) => item.id !== id),
-          hasResized ? { ...note, ...size } : note,
-        ],
-      }
-    }),
-    updateNoteText: (id, text) => set((state) => {
-      const note = state.notes.find((item) => item.id === id)
-      if (!note || note.text === text) return state
+        return {
+          notes: [
+            ...state.notes.filter((item) => item.id !== id),
+            hasMoved ? { ...note, ...position } : note,
+          ],
+        }
+      }),
+      resizeNote: (id, size) => commit((state) => {
+        const note = state.notes.find((item) => item.id === id)
+        if (!note) return state
 
-      return {
-        notes: state.notes.map((item) => item.id === id ? { ...item, text } : item),
-      }
-    }),
-    deleteNote: (id) => set((state) => {
-      const notes = state.notes.filter((note) => note.id !== id)
-      return notes.length === state.notes.length ? state : { notes }
-    }),
-    constrainNotes: (boardSize) => set((state) => {
-      let changed = false
-      const notes = state.notes.map((note) => {
-        const size = clampNoteSize(note, { x: 0, y: 0 }, boardSize)
-        const position = clampNotePosition(note, size, boardSize)
-        const isUnchanged = note.x === position.x && note.y === position.y &&
-          note.width === size.width && note.height === size.height
-        if (isUnchanged) return note
-        changed = true
-        return { ...note, ...position, ...size }
-      })
-      return changed ? { notes } : state
-    }),
-  }))
+        const hasResized = note.width !== size.width || note.height !== size.height
+        if (!hasResized && state.notes.at(-1) === note) return state
+
+        return {
+          notes: [
+            ...state.notes.filter((item) => item.id !== id),
+            hasResized ? { ...note, ...size } : note,
+          ],
+        }
+      }),
+      updateNoteText: (id, text) => commit((state) => {
+        const note = state.notes.find((item) => item.id === id)
+        if (!note || note.text === text) return state
+
+        return {
+          notes: state.notes.map((item) => item.id === id ? { ...item, text } : item),
+        }
+      }),
+      deleteNote: (id) => commit((state) => {
+        const notes = state.notes.filter((note) => note.id !== id)
+        return notes.length === state.notes.length ? state : { notes }
+      }),
+      constrainNotes: (boardSize) => commit((state) => {
+        let changed = false
+        const notes = state.notes.map((note) => {
+          const size = clampNoteSize(note, { x: 0, y: 0 }, boardSize)
+          const position = clampNotePosition(note, size, boardSize)
+          const isUnchanged = note.x === position.x && note.y === position.y &&
+            note.width === size.width && note.height === size.height
+          if (isUnchanged) return note
+          changed = true
+          return { ...note, ...position, ...size }
+        })
+        return changed ? { notes } : state
+      }),
+    }
+  })
 }
 
-export const notesStore = createNotesStore()
+export const notesStore = createNotesStore(createLocalNotesApi())
