@@ -22,6 +22,7 @@ export default function Board() {
   const moveNote = useStore(notesStore, (state) => state.moveNote)
   const resizeNote = useStore(notesStore, (state) => state.resizeNote)
   const updateNoteText = useStore(notesStore, (state) => state.updateNoteText)
+  const updateNoteColor = useStore(notesStore, (state) => state.updateNoteColor)
   const deleteNote = useStore(notesStore, (state) => state.deleteNote)
   const constrainNotes = useStore(notesStore, (state) => state.constrainNotes)
   const trash = useTrashZone(deleteNote)
@@ -63,6 +64,7 @@ export default function Board() {
             onMove={moveNote}
             onResize={resizeNote}
             onTextCommit={updateNoteText}
+            onColorCommit={updateNoteColor}
             dragHandlers={trash.dragHandlers}
           />
         ))}

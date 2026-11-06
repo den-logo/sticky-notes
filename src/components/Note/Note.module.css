@@ -37,7 +37,7 @@
 
 .note[data-dragging],
 .note[data-resizing],
-.note:has(:where(.dragHandle:focus-visible, .resizeHandle:focus-visible, textarea:focus)) {
+.note:has(:where(button:focus-visible, textarea:focus, :popover-open)) {
   z-index: var(--layer-raised-note);
 }
 
@@ -45,16 +45,22 @@
   z-index: var(--layer-dragging-note);
 }
 
-.dragHandle {
+.header {
   display: flex;
   flex-shrink: 0;
+  height: var(--note-handle-height);
+  border-bottom: 1px solid var(--note-border);
+}
+
+.dragHandle {
+  display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: var(--note-handle-height);
+  min-width: 0;
+  height: 100%;
   padding: 0;
   border: 0;
-  border-bottom: 1px solid var(--note-border);
   color: var(--note-grip);
   background: transparent;
   cursor: grab;

@@ -3,9 +3,10 @@ import { useNoteInteraction } from '../../hooks/useNoteInteraction'
 import { t } from '../../libs/i18n'
 import { Icon } from '../../libs/icons'
 import type { Position, Size } from '../../types/geometry'
-import type { NoteData } from '../../types/note'
+import type { NoteColor, NoteData } from '../../types/note'
 import type { NoteDragHandlers } from '../../types/noteDrag'
 import styles from './Note.module.css'
+import NoteColorPicker from './NoteColorPicker'
 import NoteText from './NoteText'
 
 type NoteProps = {
@@ -14,10 +15,11 @@ type NoteProps = {
   onMove: (id: string, position: Position) => void
   onResize: (id: string, size: Size) => void
   onTextCommit: (id: string, text: string) => void
+  onColorCommit: (id: string, color: NoteColor) => void
   dragHandlers: NoteDragHandlers
 }
 
-export default function Note({ note, boardSize, onMove, onResize, onTextCommit, dragHandlers }: NoteProps) {
+export default function Note({ note, boardSize, onMove, onResize, onTextCommit, onColorCommit, dragHandlers }: NoteProps) {
   const { noteRef, geometry, visualStyle, isDragging, isResizing, moveHandleProps, resizeHandleProps } =
     useNoteInteraction({ note, boardSize, onMove, onResize, dragHandlers })
   const canResize = boardSize.width - note.x >= MIN_NOTE_SIZE.width &&
@@ -38,15 +40,18 @@ export default function Note({ note, boardSize, onMove, onResize, onTextCommit, 
         ...visualStyle,
       }}
     >
-      <button
-        type="button"
-        className={styles.dragHandle}
-        aria-label={t('note.move')}
-        title={t('note.moveHint')}
-        {...moveHandleProps}
-      >
-        <span className={styles.grip} aria-hidden="true" />
-      </button>
+      <div className={styles.header}>
+        <button
+          type="button"
+          className={styles.dragHandle}
+          aria-label={t('note.move')}
+          title={t('note.moveHint')}
+          {...moveHandleProps}
+        >
+          <span className={styles.grip} aria-hidden="true" />
+        </button>
+        <NoteColorPicker color={note.color} onSelect={(color) => onColorCommit(note.id, color)} />
+      </div>
       <NoteText text={note.text} onCommit={(text) => onTextCommit(note.id, text)} />
       <button
         type="button"

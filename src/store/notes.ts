@@ -23,6 +23,7 @@ type NotesStore = {
   moveNote: (id: string, position: Position) => void
   resizeNote: (id: string, size: Size) => void
   updateNoteText: (id: string, text: string) => void
+  updateNoteColor: (id: string, color: NoteColor) => void
   deleteNote: (id: string) => void
   deleteAllNotes: () => void
   constrainNotes: (boardSize: Size) => void
@@ -118,6 +119,14 @@ export function createNotesStore(api: NotesApi) {
 
         return {
           notes: state.notes.map((item) => item.id === id ? { ...item, text } : item),
+        }
+      }),
+      updateNoteColor: (id, color) => commit((state) => {
+        const note = state.notes.find((item) => item.id === id)
+        if (!note || note.color === color) return state
+
+        return {
+          notes: state.notes.map((item) => item.id === id ? { ...item, color } : item),
         }
       }),
       deleteNote: (id) => commit((state) => {

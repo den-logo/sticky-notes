@@ -17,6 +17,8 @@
   "colors.mint": "Mint",
   "colors.blue": "Blue",
   "note.move": "Move note",
+  "note.changeColor": "Change note color",
+  "note.color": "Note color",
   "note.moveHint": "Drag to move, or use the arrow keys. Enter or Space brings to front. Escape cancels a drag.",
   "note.resize": "Resize note",
   "note.resizeHint": "Drag to resize, or use the arrow keys. Enter or Space brings to front. Escape cancels a resize.",
