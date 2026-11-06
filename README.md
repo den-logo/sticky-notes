@@ -24,3 +24,7 @@ npm run preview
 The production build is written to `dist/`. The build command checks TypeScript
 before bundling. Vite and its official React plugin handle TypeScript and JSX
 transforms, along with React Fast Refresh during development.
+
+## GitHub Pages
+
+The GitHub Pages URL is <https://den-logo.github.io/sticky-notes/>
